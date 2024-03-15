@@ -1,13 +1,20 @@
-// this is what an RSS feed setup looks like. You also have to install Astro's RSS package
+// this is what an RSS feed setup looks like (updated to use Content Collections)
+// You also have to install Astro's RSS package
 
-import rss, { pagesGlobToRssItems } from '@astrojs/rss';
+import { getCollection } from 'astro:content';
 
 export async function GET(context) {
+  const posts = await getCollection("posts");
   return rss({
     title: 'Astro Learner | Blog',
     description: 'My journey learning Astro',
     site: context.site,
-    items: await pagesGlobToRssItems(import.meta.glob('./**/*.md')),
+    items: posts.map((post) => ({
+      title: post.data.title,
+      pubDate: post.data.pubDate,
+      description: post.data.description,
+      link: `/posts/${post.slug}/`,
+    })),
     customData: `<language>en-us</language>`,
   });
 }
